@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from 'dotenv';
 import { connectDB } from "./config/db.js";
+import Product from "./models/product.model.js";
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.post('/api/products', async (req, res) => {
     }
 
     const newProduct = new Product(product);
+
     try {
         await newProduct.save();
         res.status(201).json({ success: true, data: newProduct });
@@ -24,10 +26,20 @@ app.post('/api/products', async (req, res) => {
         console.error("Error in creating product: ", error.message);
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
-
 });
 
-// To test this use Postman  
+app.delete("/api/products/:id", async (req, res) => {
+    const { id } = req.params; // get the product id from the request params 
+
+    try {
+        await Product.findByIdAndDelete(id);
+        res.status(200).json({ success: true, message: 'Product deleted successfully' });
+    } catch (error) {
+        console.error("Error in deleting product: ", error.message);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+});
+
 
 app.listen(5000, () => {
     connectDB();
